@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery | Nevin Benny</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .gallery-grid {
+            columns: 3;
+            column-gap: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .gallery-grid {
+                columns: 2;
+            }
+        }
+        @media (max-width: 640px) {
+            .gallery-grid {
+                columns: 1;
+            }
+        }
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+        }
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        /* Lightbox styles */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            padding: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .lightbox.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+        }
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90vh;
+            position: relative;
+        }
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .lightbox-content img.loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .lightbox-content video {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .lightbox-content video.loaded {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .lightbox.active .lightbox-close {
+            opacity: 1;
+        }
+        .lightbox-prev,
+        .lightbox-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 1rem;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .lightbox.active .lightbox-prev,
+        .lightbox.active .lightbox-next {
+            opacity: 1;
+        }
+        .lightbox-prev {
+            left: 1rem;
+        }
+        .lightbox-next {
+            right: 1rem;
+        }
+        .lightbox-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            display: none;
+        }
+        .lightbox-loading.active {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <a href="/" class="text-xl font-bold">Nevin Benny</a>
+                <div class="flex space-x-8">
+                    <a href="/" class="text-gray-600 hover:text-black">Home</a>
+                    <a href="about.html" class="text-gray-600 hover:text-black">About</a>
+                    <a href="gallery.html" class="text-black font-semibold">Gallery</a>
+                    <a href="contact.html" class="text-gray-600 hover:text-black">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Gallery Header -->
+    <div class="bg-gradient-to-r from-gray-900 to-gray-700 text-white py-20">
+        <div class="max-w-6xl mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-6">Gallery</h1>
+            <p class="text-xl text-gray-300 max-w-2xl">
+                A collection of my best work in photography and videography.
+            </p>
+        </div>
+    </div>
+
+    <!-- Gallery Navigation -->
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div class="flex justify-center space-x-4 mb-12">
+            <button class="px-6 py-2 bg-black text-white rounded-md" id="photos-btn">Photos</button>
+            <button class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" id="videos-btn">Videos</button>
+        </div>
+
+        <!-- Photos Section -->
+        <div id="photos-section" class="gallery-grid">
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20241108_134600.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20241111_173924.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20241114_081858.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20241129_132146.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250216_132414.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250307_154102.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250316_130454.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250316_134422.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250316_134832.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/20250318_140145.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/VideoCapture_20250308-152431.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/VideoCapture_20250308-195032.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/VideoCapture_20250308-195050.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/VideoCapture_20250308-195245.jpg" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="images/IMG_20250322_111140_311.webp" alt="Photography" class="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow">
+            </div>
+        </div>
+
+        <!-- Videos Section (Initially Hidden) -->
+        <div id="videos-section" class="gallery-grid hidden">
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/1.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 1</h3>
+            </div>
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/11.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 2</h3>
+            </div>
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/111.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 3</h3>
+            </div>
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/12.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 4</h3>
+            </div>
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/1212121.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 5</h3>
+            </div>
+            <div class="gallery-item">
+                <div class="video-wrapper rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <video controls class="w-full">
+                        <source src="videos/3123.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h3 class="text-lg font-semibold mt-2">Video 6</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <span class="lightbox-prev" onclick="changeImage(-1)">&#10094;</span>
+        <div class="lightbox-content">
+            <img src="" id="lightbox-img" alt="Lightbox Image">
+            <video id="lightbox-video" controls></video>
+            <div class="lightbox-loading" id="lightbox-loading">
+                <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+        </div>
+        <span class="lightbox-next" onclick="changeImage(1)">&#10095;</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t mt-16">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="flex justify-between items-center">
+                <p class="text-gray-600" style="text-align: center;"> 2025 Nevin Benny. All rights reserved.</p>
+                <div class="flex space-x-6">
+                    <a href="https://www.instagram.com/nevinphilip_/" class="text-gray-600 hover:text-black">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://www.youtube.com/@Nevinphilip" class="text-gray-600 hover:text-black">
+                        <i class="fab fa-youtube"></i>
+                    </a>
+                    <a href="https://www.linkedin.com/in/nevin-benny/" class="text-gray-600 hover:text-black">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Gallery tab switching
+        const photosBtn = document.getElementById('photos-btn');
+        const videosBtn = document.getElementById('videos-btn');
+        const photosSection = document.getElementById('photos-section');
+        const videosSection = document.getElementById('videos-section');
+
+        photosBtn.addEventListener('click', () => {
+            photosBtn.classList.add('bg-black', 'text-white');
+            photosBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            videosBtn.classList.remove('bg-black', 'text-white');
+            videosBtn.classList.add('bg-gray-200', 'text-gray-700');
+            photosSection.classList.remove('hidden');
+            videosSection.classList.add('hidden');
+        });
+
+        videosBtn.addEventListener('click', () => {
+            videosBtn.classList.add('bg-black', 'text-white');
+            videosBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            photosBtn.classList.remove('bg-black', 'text-white');
+            photosBtn.classList.add('bg-gray-200', 'text-gray-700');
+            videosSection.classList.remove('hidden');
+            photosSection.classList.add('hidden');
+        });
+
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxVideo = document.getElementById('lightbox-video');
+        const lightboxLoading = document.getElementById('lightbox-loading');
+        let currentImageIndex = 0;
+        const images = Array.from(document.querySelectorAll('.gallery-item img'));
+        const videos = Array.from(document.querySelectorAll('.gallery-item video'));
+
+        function openLightbox(element) {
+            if (element.querySelector('img')) {
+                const img = element.querySelector('img');
+                currentImageIndex = images.indexOf(img);
+                loadImage(img.src);
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else if (element.querySelector('video')) {
+                const video = element.querySelector('video');
+                currentImageIndex = videos.indexOf(video);
+                loadVideo(video.src);
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            lightboxImg.classList.remove('loaded');
+            lightboxVideo.classList.remove('loaded');
+        }
+
+        function loadImage(src) {
+            lightboxImg.classList.remove('loaded');
+            lightboxLoading.classList.add('active');
+            
+            lightboxImg.src = src;
+            lightboxImg.onload = () => {
+                lightboxLoading.classList.remove('active');
+                lightboxImg.classList.add('loaded');
+            };
+        }
+
+        function loadVideo(src) {
+            lightboxVideo.classList.remove('loaded');
+            lightboxLoading.classList.add('active');
+            
+            lightboxVideo.src = src;
+            lightboxVideo.onloadeddata = () => {
+                lightboxLoading.classList.remove('active');
+                lightboxVideo.classList.add('loaded');
+            };
+        }
+
+        function changeImage(direction) {
+            if (images.length > 0) {
+                currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+                loadImage(images[currentImageIndex].src);
+            } else if (videos.length > 0) {
+                currentImageIndex = (currentImageIndex + direction + videos.length) % videos.length;
+                loadVideo(videos[currentImageIndex].src);
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowLeft') changeImage(-1);
+            if (e.key === 'ArrowRight') changeImage(1);
+        });
+
+        // Close lightbox when clicking outside the image
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) closeLightbox();
+        });
+    </script>
+</body>
+</html>
